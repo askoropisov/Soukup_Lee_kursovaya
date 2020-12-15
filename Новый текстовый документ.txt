@@ -1,0 +1,598 @@
+#include <iomanip>
+#include <iostream>
+#include "glut.h"
+#include "glaux.h"
+#include "control.h"
+#include <conio.h>
+#include <math.h>
+
+#pragma comment(lib, "opengl32.lib")
+#pragma comment(lib, "glut32.lib")
+#pragma comment(lib, "glaux.lib")
+
+using namespace std;
+double chislo_dlya_sravneniya = INT_MAX;
+double min_dis = 0;
+
+int p_Point1_x = 0;
+int p_Point1_y = 0;
+int p_Point2_x = 0;
+int p_Point2_y = 0;
+
+int DRP[12][12] =
+{
+ {888, 888, 888, 888, 888, 888, 888, 888, 888, 888, 888, 888},
+ {888, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 888},
+ {888, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 888},
+ {888, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 888},
+ {888, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 888},
+ {888, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 888},
+ {888, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 888},
+ {888, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 888},
+ {888, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 888},
+ {888, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 888},
+ {888, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 888},
+ {888, 888, 888, 888, 888, 888, 888, 888, 888, 888, 888, 888},
+};
+
+void RenderScene() {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, w1, h1);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(45.0f, w1 / h1, 0.1f, 1000.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	glTranslatef(a, b, -Zoom);
+	glRotatef(vx, 1, 0, 0);
+	glRotatef(vy, 0, 1, 0);
+	glRotatef(vz, 0, 0, 1);
+
+	for (int i = 1; i < 11; i++)
+	{
+		for (int j = 1; j < 11; j++)
+		{
+			switch (DRP[i][j])
+			{
+
+			case 0: glBegin(GL_QUADS);							//ïóñòûå êëåòêè
+				glColor3f(1, 1, 1);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i - 1 + 16.5, 2);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i - 1 + 16.5, 2);
+				glEnd();
+				break;
+			case -111: glBegin(GL_QUADS);						//term S
+				glColor3f(0, 1, 0);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i - 1 + 16.5, 2);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i - 1 + 16.5, 2);
+				glEnd();
+				break;
+			case -555:	 glBegin(GL_QUADS);											//temr T1...T5
+				glColor3f(1, 0, 0);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i - 1 + 16.5, 2);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i - 1 + 16.5, 2);
+				glEnd();
+				break;
+			case -501:	 glBegin(GL_QUADS);											//temr T1...T5
+				glColor3f(1, 0, 0);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i - 1 + 16.5, 2);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i - 1 + 16.5, 2);
+				glEnd();
+				break;
+			case -502:	 glBegin(GL_QUADS);											//temr T1...T5
+				glColor3f(1, 0, 0);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i - 1 + 16.5, 2);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i - 1 + 16.5, 2);
+				glEnd();
+				break;
+			case -503:	 glBegin(GL_QUADS);											//temr T1...T5
+				glColor3f(1, 0, 0);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i - 1 + 16.5, 2);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i - 1 + 16.5, 2);
+				glEnd();
+				break;
+			case -504:	 glBegin(GL_QUADS);											//temr T1...T5
+				glColor3f(1, 0, 0);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i - 1 + 16.5, 2);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i - 1 + 16.5, 2);
+				glEnd();
+				break;
+			case -505:	 glBegin(GL_QUADS);											//temr T1...T5
+				glColor3f(1, 0, 0);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i - 1 + 16.5, 2);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i - 1 + 16.5, 2);
+				glEnd();
+				break;
+			case 888: glBegin(GL_QUADS);						//ïðåïÿòñòâèÿ (ãðàíè) 
+				glColor3f(0.8, 0.8, 0.8);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i + 16.5, 2);
+				glVertex3f(2 * j - 16.5, -2 * i - 1 + 16.5, 2);
+				glVertex3f(2 * j + 1 - 16.5, -2 * i - 1 + 16.5, 2);
+				glEnd();
+				break;
+			case 777: glColor3f(0.1, 0.2, 1);						//îáðàòíûé ïóòü
+				glPushMatrix();
+				glTranslatef(2 * j - 16, -2 * i + 16, 3);
+				glutSolidCube(1);
+				glPopMatrix();
+				break;
+			}
+		}
+	}
+	glutSwapBuffers();
+}
+int manh_value()
+{
+	int value = 0;
+	for (int i = 1; i < 11; i++)
+	{
+		cout << endl;
+		for (int j = 1; j < 11; j++)
+		{
+			if (DRP[i][j] == 777) value++;
+		}
+	}
+	return value;
+}
+void Print_only_point(int DRP[12][12])									//çàïîëíÿåì ìàòðèöó ñèìâîëàìè
+{
+	int value = 0;
+	char new_DRP[12][12];
+	for (int i = 1; i < 11; i++)
+	{
+		cout << endl;
+		for (int j = 1; j < 11; j++)
+		{
+			if (DRP[i][j] == 0) new_DRP[i][j] = '.';
+			if (DRP[i][j] == -111) new_DRP[i][j] = 'S';
+			if (DRP[i][j] == -501) new_DRP[i][j] = 'T';
+			if (DRP[i][j] == -502) new_DRP[i][j] = 'T';
+			if (DRP[i][j] == -503) new_DRP[i][j] = 'T';
+			if (DRP[i][j] == -504) new_DRP[i][j] = 'T';
+			if (DRP[i][j] == -505) new_DRP[i][j] = 'T';
+			if (DRP[i][j] == 888) new_DRP[i][j] = '#';
+			if (DRP[i][j] == 777) new_DRP[i][j] = '*'; 
+			cout << setw(4) << new_DRP[i][j];
+		}
+	}
+	cout << endl << endl;
+}
+
+double Manhhatan_distance(int x1, int y1, int x2, int y2, double finaly_dis)					// íàõîæäåíèå Ìàíõåòòîíîâñêîãî ðàññòîÿíèÿ
+{
+	int dis_x = abs(x1 - x2);
+	int dis_y = abs(y1 - y2);
+	int q_dis_x = pow(dis_x, 2);
+	int q_dis_y = pow(dis_y, 2);
+	finaly_dis = sqrt(q_dis_x + q_dis_y);
+	return finaly_dis;
+}
+
+void routing(int first_point_x, int first_point_y, int second_point_x, int second_point_y, int next_point_x, int next_point_y)
+{
+	if (second_point_y >= first_point_y && second_point_y <= next_point_y && second_point_x >= first_point_x && second_point_x >= next_point_x)
+	{
+		while (first_point_y != second_point_y)
+		{
+			first_point_y += 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+		while (first_point_x != second_point_x)
+		{
+			first_point_x += 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+	}
+
+	if (first_point_x >= second_point_x && second_point_x >= next_point_x && second_point_y >= first_point_y && next_point_y >= second_point_y)
+	{
+		while (first_point_x != second_point_x)
+		{
+			first_point_x -= 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+		while (first_point_y != second_point_y)
+		{
+			first_point_y += 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+	}
+
+	if (first_point_x >= second_point_x && second_point_x <= next_point_x && first_point_y <= second_point_y && second_point_y >= next_point_y)
+	{
+		while (first_point_x != second_point_x)
+		{
+			first_point_x -= 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+		while (first_point_y != second_point_y)
+		{
+			first_point_y += 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+	}
+	if (first_point_x >= second_point_x && second_point_x >= next_point_x && first_point_y <= second_point_y && second_point_y >= next_point_y)
+	{
+		while (first_point_x != second_point_x)
+		{
+			first_point_x -= 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+		while (first_point_y != second_point_y)
+		{
+			first_point_y += 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+	}
+	if (first_point_x <= second_point_x && second_point_x <= next_point_x && first_point_y <= second_point_y && second_point_y >= next_point_y)
+	{
+		while (first_point_x != second_point_x)
+		{
+			first_point_x += 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+		while (first_point_y != second_point_y)
+		{
+			first_point_y += 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+	}
+	if (first_point_x >= second_point_x && second_point_x <= next_point_x && first_point_y >= second_point_y && second_point_y <= next_point_y)
+	{
+		while (first_point_x != second_point_x)
+		{
+			first_point_x -= 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+		while (first_point_y != second_point_y)
+		{
+			first_point_y -= 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+	}
+
+	else
+	{
+		if (first_point_x <= second_point_x && first_point_y <= second_point_y)						//åñëè ïðàâåå è íèæå (èëè íà îäíîì óðîâíå)
+		{
+			while (first_point_y != second_point_y)                                                              //Åñëè òåðìèíàë ïðàâåå ïðèåìíèêà
+			{
+				DRP[first_point_x][first_point_y + 1] = 777;
+				first_point_y += 1;
+			}
+
+			while (first_point_x != second_point_x)                                                              //Åñëè òåðìèíàë íèæå ïðèåìíèêà
+			{
+				DRP[first_point_x + 1][first_point_y] = 777;
+				first_point_x += 1;
+			}
+		}
+
+		if (first_point_x >= second_point_x && first_point_y <= second_point_y)						//åñëè ïðàâåå è âûøå (èëè íà îäíîì óðîâíå)
+		{
+			while (first_point_y != second_point_y)                                                              //Åñëè òåðìèíàë ëåâåå ïðèåìíèêà
+			{
+				DRP[first_point_x][first_point_y + 1] = 777;
+				first_point_y += 1;
+			}
+			while (first_point_x != second_point_x)                                                              //Åñëè òåðìèíàë âûøå ïðèåìíèêà
+			{
+				DRP[first_point_x - 1][first_point_y] = 777;
+				first_point_x -= 1;
+			}
+		}
+		/////////////////////////////////////////
+		if (first_point_x <= second_point_x && first_point_y >= second_point_y)						//åñëè ëåâåå è íèæå (èëè íà îäíîì óðîâíå)
+		{
+			while (first_point_y != second_point_y)                                                              //Åñëè òåðìèíàë ëåâåå ïðèåìíèêà
+			{
+				DRP[first_point_x][first_point_y - 1] = 777;
+				first_point_y -= 1;
+			}
+			while (first_point_x != second_point_x)                                                              //Åñëè òåðìèíàë íèæå ïðèåìíèêà
+			{
+				DRP[first_point_x + 1][first_point_y] = 777;
+				first_point_x += 1;
+			}
+		}
+
+		if (first_point_x >= second_point_x && first_point_y >= second_point_y)						//åñëè ëåâåå è âûøå (èëè íà îäíîì óðîâíå)
+		{
+			while (first_point_y != second_point_y)                                                              //Åñëè òåðìèíàë ïðàâåå ïðèåìíèêà
+			{
+				DRP[first_point_x][first_point_y - 1] = 777;
+				first_point_y -= 1;
+			}
+			while (first_point_x != second_point_x)                                                              //Åñëè òåðìèíàë âûøå ïðèåìíèêà
+			{
+				DRP[first_point_x - 1][first_point_y] = 777;
+				first_point_x -= 1;
+			}
+		}
+	}
+}
+
+void first_routing(int first_point_x, int first_point_y, int second_point_x, int second_point_y)
+{
+	if (first_point_x <= second_point_x && first_point_y <= second_point_y)						//åñëè ïðàâåå è íèæå (èëè íà îäíîì óðîâíå)
+	{
+		while (first_point_y != second_point_y)                                                              //Åñëè òåðìèíàë ïðàâåå ïðèåìíèêà
+		{
+			first_point_y += 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+
+		while (first_point_x != second_point_x)                                                              //Åñëè òåðìèíàë íèæå ïðèåìíèêà
+		{
+			first_point_x += 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+	}
+
+	if (first_point_x >= second_point_x && first_point_y <= second_point_y)						//åñëè ïðàâåå è âûøå (èëè íà îäíîì óðîâíå)
+	{
+		while (first_point_y != second_point_y)                                                              //Åñëè òåðìèíàë ëåâåå ïðèåìíèêà
+		{
+			first_point_y += 1;
+			DRP[first_point_x][first_point_y] = 777;		
+		}
+		while (first_point_x != second_point_x)                                                              //Åñëè òåðìèíàë âûøå ïðèåìíèêà
+		{
+			first_point_x -= 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+	}
+	/////////////////////////////////////////
+	if (first_point_x <= second_point_x && first_point_y >= second_point_y)						//åñëè ëåâåå è íèæå (èëè íà îäíîì óðîâíå)
+	{
+		while (first_point_y != second_point_y)                                                              //Åñëè òåðìèíàë ëåâåå ïðèåìíèêà
+		{
+			first_point_y -= 1;
+			DRP[first_point_x][first_point_y] = 777;
+		}
+		while (first_point_x != second_point_x)                                                              //Åñëè òåðìèíàë íèæå ïðèåìíèêà
+		{
+			DRP[first_point_x + 1][first_point_y] = 777;
+			first_point_x += 1;
+		}
+	}
+
+	if (first_point_x >= second_point_x && first_point_y >= second_point_y)						//åñëè ëåâåå è âûøå (èëè íà îäíîì óðîâíå)
+	{
+		while (first_point_y != second_point_y)                                                              //Åñëè òåðìèíàë ïðàâåå ïðèåìíèêà
+		{
+			first_point_y -= 1;
+			DRP[first_point_x][first_point_y] = 777;			
+		}
+		while (first_point_x != second_point_x)                                                              //Åñëè òåðìèíàë âûøå ïðèåìíèêà
+		{
+			first_point_x -= 1;
+			DRP[first_point_x][first_point_y] = 777;	
+		}
+	}
+}
+
+int main(int argc, char* argv[])
+{
+	setlocale(LC_ALL, "Russian");
+	cout << endl << "Âû çàïóñòèëè ïðîãðàììó ñòóäåíòêè ãðóïïû ÝÍ-44 Êðåòèíèíîé Ïîëèíû." << endl
+		<< "Äàííàÿ ïðîãðàììà ðåàëèçóåò ïîñëåäîâàòåëüíîå ïîñòðîåíèå äåðåâà Øòåéíåðà â óïðîùåííîì âèäå." << endl
+		<< "Â êà÷åñòâå ÄÐÏ âûñòóïàåò ìàòðèöà ðàçìåðîì 10õ10." << endl
+		<< "Ñâîáîäíûå êëåòêè îòîáðàæàþòñÿ êàê áåëûå êâàäðàòû, Èñòî÷íèê S - çåëåíûé êâàäðàò," << endl
+		<< "òåðìèíàëû Ò1...Ò5 - êðàñíûå êâàäðàòû, âåòâè äåðåâà Øòåéíåðà - ãîëóáûå êâàäðàòû." << endl << endl;
+
+	Print_only_point(DRP);
+
+	int s = -111, t1 = -505, t2 = -505, t3 = -505, t4 = -505, t5 = -505;
+	unsigned int sx, sy, t1x, t1y, t2x, t2y, t3x, t3y, t4x, t4y, t5x, t5y;
+
+	int mass_koord_x[5];
+	int mass_koord_y[5];
+	/*int next_Point1_x = 0;
+	int next_Point1_y = 0;
+	int next_Point2_x = 0;
+	int next_Point2_y = 0;
+	int next_Point3_x = 0;
+	int next_Point3_y = 0;
+	int next_Point4_x = 0;
+	int next_Point4_y = 0;
+	int next_Point5_x = 0;
+	int next_Point5_y = 0;*/
+	double res0 = 0;
+
+s:               //ïðîâåðî÷êà êîîðäèíàò s
+	cout << "Ââåäèòå S: ";
+	cin >> sx >> sy;
+	if (DRP[sx][sy] == 888)
+	{
+		cout << "Ýòà êëåòêà çàíÿòà ïðåïÿòñòâèåì, âûáåðèòå äðóãóþ" << endl;
+		goto s;
+	}
+	for (int i = 0; i < 5; i++)
+	{
+		cout << endl << "Ââåäèòå êîîðäèíàòû " << i + 1 << "-ãî ïðèåìíèêà: ";
+		cin >> mass_koord_x[i] >> mass_koord_y[i];
+	}
+
+	DRP[sx][sy] = s;
+	DRP[mass_koord_x[0]][mass_koord_y[0]] = t1;
+	DRP[mass_koord_x[1]][mass_koord_y[1]] = t2;
+	DRP[mass_koord_x[2]][mass_koord_y[2]] = t3;
+	DRP[mass_koord_x[3]][mass_koord_y[3]] = t4;
+	DRP[mass_koord_x[4]][mass_koord_y[4]] = t5;
+
+	Print_only_point(DRP);
+
+	double value = 100;
+	{
+		//for (int i = 0; i < 5; i++)   // to 1 point
+		//{
+		//	if (Manhhatan_distance(sx, sy, mass_koord_x[i], mass_koord_y[i], res0) <= value)
+		//	{
+		//		value = Manhhatan_distance(sx, sy, mass_koord_x[i], mass_koord_y[i], res0);
+		//		next_Point1_x = mass_koord_x[i];
+		//		next_Point1_y = mass_koord_y[i];
+		//	}
+		//}
+		//value = 100;
+
+		//for (int i = 0; i < 5; i++)   // to 2 point
+		//{
+		//	if (Manhhatan_distance(next_Point1_x, next_Point1_x, mass_koord_x[i], mass_koord_y[i], res0) <= value)
+		//	{
+		//		if (DRP[mass_koord_x[i]][mass_koord_y[i]] != DRP[next_Point1_x][next_Point1_y])
+		//		{
+		//			value = Manhhatan_distance(next_Point1_x, next_Point1_y, mass_koord_x[i], mass_koord_y[i], res0);
+		//			next_Point2_x = mass_koord_x[i];
+		//			next_Point2_y = mass_koord_y[i];
+		//		}
+		//	}
+		//}
+		//value = 100;
+
+		//for (int i = 0; i < 5; i++)   // to 3 point
+		//{
+		//	if (Manhhatan_distance(next_Point2_x, next_Point2_x, mass_koord_x[i], mass_koord_y[i], res0) <= value)
+		//	{
+		//		if ((DRP[mass_koord_x[i]][mass_koord_y[i]] != DRP[next_Point1_x][next_Point1_y]) &&
+		//			(DRP[mass_koord_x[i]][mass_koord_y[i]] != DRP[next_Point2_x][next_Point2_y]))
+		//		{
+		//			value = Manhhatan_distance(next_Point2_x, next_Point2_y, mass_koord_x[i], mass_koord_y[i], res0);
+		//			next_Point3_x = mass_koord_x[i];
+		//			next_Point3_y = mass_koord_y[i];
+		//		}
+		//	}
+		//}
+		//value = 100;
+
+		//for (int i = 0; i < 5; i++)   // to 4 point
+		//{
+		//	if (Manhhatan_distance(next_Point3_x, next_Point3_x, mass_koord_x[i], mass_koord_y[i], res0) <= value)
+		//	{
+		//		if ((DRP[mass_koord_x[i]][mass_koord_y[i]] != DRP[next_Point1_x][next_Point1_y]) &&
+		//			(DRP[mass_koord_x[i]][mass_koord_y[i]] != DRP[next_Point2_x][next_Point2_y]) &&
+		//			(DRP[mass_koord_x[i]][mass_koord_y[i]] != DRP[next_Point3_x][next_Point3_y]))
+		//		{
+		//			value = Manhhatan_distance(next_Point3_x, next_Point3_y, mass_koord_x[i], mass_koord_y[i], res0);
+		//			next_Point4_x = mass_koord_x[i];
+		//			next_Point4_y = mass_koord_y[i];
+		//		}
+		//	}
+		//}
+
+		//if (mass_koord_x[0] != next_Point1_x && mass_koord_y[0] != next_Point1_y
+		//	&& mass_koord_x[0] != next_Point2_x && mass_koord_y[0] != next_Point2_y
+		//	&& mass_koord_x[0] != next_Point3_x && mass_koord_y[0] != next_Point3_y
+		//	&& mass_koord_x[0] != next_Point4_x && mass_koord_y[0] != next_Point4_y)
+		//{
+		//	next_Point5_x = mass_koord_x[0]; next_Point5_y = mass_koord_y[0];
+		//}
+		//if (mass_koord_x[1] != next_Point1_x && mass_koord_y[1] != next_Point1_y
+		//	&& mass_koord_x[1] != next_Point2_x && mass_koord_y[1] != next_Point2_y
+		//	&& mass_koord_x[1] != next_Point3_x && mass_koord_y[1] != next_Point3_y
+		//	&& mass_koord_x[1] != next_Point4_x && mass_koord_y[1] != next_Point4_y)
+		//{
+		//	next_Point5_x = mass_koord_x[1]; next_Point5_y = mass_koord_y[1];
+		//}
+		//if (mass_koord_x[2] != next_Point1_x && mass_koord_y[2] != next_Point1_y
+		//	&& mass_koord_x[2] != next_Point2_x && mass_koord_y[2] != next_Point2_y
+		//	&& mass_koord_x[2] != next_Point3_x && mass_koord_y[2] != next_Point3_y
+		//	&& mass_koord_x[2] != next_Point4_x && mass_koord_y[2] != next_Point4_y)
+		//{
+		//	next_Point5_x = mass_koord_x[2]; next_Point5_y = mass_koord_y[2];
+		//}
+		//if (mass_koord_x[3] != next_Point1_x && mass_koord_y[3] != next_Point1_y
+		//	&& mass_koord_x[3] != next_Point2_x && mass_koord_y[3] != next_Point2_y
+		//	&& mass_koord_x[3] != next_Point3_x && mass_koord_y[3] != next_Point3_y
+		//	&& mass_koord_x[3] != next_Point4_x && mass_koord_y[3] != next_Point4_y)
+		//{
+		//	next_Point5_x = mass_koord_x[3]; next_Point5_y = mass_koord_y[3];
+		//}
+		//if (mass_koord_x[4] != next_Point1_x && mass_koord_y[4] != next_Point1_y
+		//	&& mass_koord_x[4] != next_Point2_x && mass_koord_y[4] != next_Point2_y
+		//	&& mass_koord_x[4] != next_Point3_x && mass_koord_y[4] != next_Point3_y
+		//	&& mass_koord_x[4] != next_Point4_x && mass_koord_y[4] != next_Point4_y)
+		//{
+		//	next_Point5_x = mass_koord_x[4]; next_Point5_y = mass_koord_y[4];
+		//}
+
+		/*routing(sx, sy, next_Point1_x, next_Point1_y, next_Point2_x, next_Point2_y);
+		routing(next_Point1_x, next_Point1_y, next_Point2_x, next_Point2_y, next_Point3_x, next_Point3_y);
+		routing(next_Point2_x, next_Point2_y, next_Point3_x, next_Point3_y, next_Point4_x, next_Point4_y);
+		routing(next_Point3_x, next_Point3_y, next_Point4_x, next_Point4_y, next_Point5_x, next_Point5_y);
+		routing(next_Point4_x, next_Point4_y, next_Point5_x, next_Point5_y, next_Point5_x, next_Point5_y);*/
+	}
+
+	first_routing(sx, sy, mass_koord_x[0], mass_koord_y[0]);
+	first_routing(sx, sy, mass_koord_x[1], mass_koord_y[1]);
+	first_routing(sx, sy, mass_koord_x[2], mass_koord_y[2]);
+	first_routing(sx, sy, mass_koord_x[3], mass_koord_y[3]);
+	first_routing(sx, sy, mass_koord_x[4], mass_koord_y[4]);
+
+	DRP[sx][sy] = -111;
+	DRP[mass_koord_x[0]][mass_koord_y[0]] = -505;
+	DRP[mass_koord_x[1]][mass_koord_y[1]] = -505;
+	DRP[mass_koord_x[2]][mass_koord_y[2]] = -505;
+	DRP[mass_koord_x[3]][mass_koord_y[3]] = -505;
+	DRP[mass_koord_x[4]][mass_koord_y[4]] = -505;
+
+	int sum_val = manh_value()+5;
+	Print_only_point(DRP);
+	cout << endl << "Суммарная стоимость цепи = " << sum_val;
+
+	int sum_val_1 = 0;
+	int next_point_x[10];
+	int next_point_y[10];
+
+	/*while (sum_val >= sum_val_1)
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			for (int j = 0; j < 10; j++)
+			{
+				if (DRP[next_point_x[i]][next_point_y[j]]!=-505 && DRP[next_point_x[i]][next_point_y[j]] != -111)
+				first_routing(sx, sy, next_point_x[i], next_point_y[j]);
+				first_routing(next_point_x[i], next_point_y[j], mass_koord_x[0], mass_koord_y[0]);
+				first_routing(next_point_x[i], next_point_y[j], mass_koord_x[1], mass_koord_y[1]);
+				first_routing(next_point_x[i], next_point_y[j], mass_koord_x[2], mass_koord_y[2]);
+				first_routing(next_point_x[i], next_point_y[j], mass_koord_x[3], mass_koord_y[3]);
+				first_routing(next_point_x[i], next_point_y[j], mass_koord_x[4], mass_koord_y[4]);
+				sum_val_1 = manh_value() + 5;
+			}
+		}
+	}*/
+
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+	glutInitWindowPosition(100, 100);
+	glutInitWindowSize(800, 800);
+	glutCreateWindow("Ïîñëåäîâàòåëüíîå äåðåâî Øòåéíåðà");
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(0, 0, 0, 1);
+	glutReshapeFunc(reshape);
+	glutDisplayFunc(RenderScene);
+	glutKeyboardFunc(Read_kb);
+	glutSpecialFunc(ReadSpec);
+	glutMainLoop();
+	delete DRP;
+	return 0;
+}
