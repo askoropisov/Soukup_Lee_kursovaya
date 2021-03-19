@@ -99,14 +99,12 @@ bool SoukupAlgo(int x1, int y1, int x2, int y2)
 
     stack<int>FILO_stack;                                                //FILO
     queue<int>LIFO_queue;                                                //LIFO   (приоритетная очередь)           
-       // cout << "in FILO_stack " << start_func << endl;
+
     FILO_stack.push(start_func);                                                //добавляем элемент в очередь
     Spath[start_func] = -1;
     visit[start_func] = true;
 
-    int cnt = 0;
-
-    while (!FILO_stack.empty())                  //пока в очереди есть эл-ты    
+    while (!FILO_stack.empty())                             //пока в очереди есть эл-ты    
     {     
         int first_element = FILO_stack.top();              //первый элемент в очереди
 
@@ -118,7 +116,7 @@ bool SoukupAlgo(int x1, int y1, int x2, int y2)
         if (DIRECTION(first_element, visit, target_func) <= TO_TARGET(first_element, target_func))      //определяем расстояние от каждого источника до его приямника и сравниваем их
         {
             int id = super_id;
-            //cout<<"in FILO_stack "<<id<<endl;
+
             FILO_stack.push(id);                             //добавляем элемент в очередь
             visit[id] = true;
             Spath[id] = first_element;
