@@ -48,21 +48,21 @@ void RenderScene();
 int TO_TARGET(int curr, int target)                             //расстояние до приемника
 {
     int dis;
-    int tx = target / n, ty = target % n, cx = curr / n, cy = curr % n;
+    int tx = target / n, ty = target % n, cx = curr / n, cy = curr % n;                     //снова определяем координаты Х и У приемника и источника
     dis = abs(tx - cx) + abs(ty - cy);
-    return dis;
+    return dis;                                                                             //находим манхеттоновское расстояние
 }
 
-int DIRECTION(int next, bool visit[], int target)
+int DIRECTION(int next, bool visit[], int target)                           //направление
 {
     int dis = INT_MAX;
-    int tx = target / n, ty = target % n, nx = next / n, ny = next % n;
+    int tx = target / n, ty = target % n, nx = next / n, ny = next % n;                     //снова определяем координаты Х и У приемника и источника
 
     for (int i = 0; i < 4; i++) 
     {
-        int x = nx + dx[i], y = ny + dy[i];
+        int x = nx + dx[i], y = ny + dy[i];                                                             //хз
         int id = x * n + y;
-        if ((x >= 0 && x < n && y >= 0 && y < n) && visit[id] == false && Sblock[id] == false) 
+        if ((x >= 0 && x < n && y >= 0 && y < n) && visit[id] == false && Sblock[id] == false)          //определяем наименьшее расстояние между источником и приемником в зависимости от выбора направления ???
         {
             if (dis > abs(tx - x) + abs(ty - y))
             {
@@ -71,12 +71,12 @@ int DIRECTION(int next, bool visit[], int target)
             }
         }
     }
-    return dis;
+    return dis;                                                                                         //находим направление, начиная с которого получим наименьшеее расстояние ??
 }
 
 int NGHBR_IN_DIR(int curr, bool visit[], int des)
 {
-    int x = curr / n, y = curr % n;
+    int x = curr / n, y = curr % n;                                                 //хз
     bool flag = true;
     int id;
 
@@ -91,22 +91,22 @@ int NGHBR_IN_DIR(int curr, bool visit[], int des)
 bool SoukupAlgo(int x1, int y1, int x2, int y2)
 {
      bool visit[10000];
-    memset(visit, false, (n * n) + 1);                              //заполняем все фолзами
+    memset(visit, false, (n * n) + 1);                              //заполняем все 0
 
     int src = x1 * n + y1, des = x2 * n + y2;
 
     stack<int>plist;                                                ////фифо
     queue<int>nlist;                                                //лифо            
        // cout << "in plist " << src << endl;
-    plist.push(src);
+    plist.push(src);                                                //добавляем элемент в очередь
     Spath[src] = -1;
     visit[src] = true;
 
     int cnt = 0;
 
-    while (!plist.empty())                  //пока в стеке есть эл-ты    
+    while (!plist.empty())                  //пока в очереди есть эл-ты    
     {     
-        int pid = plist.top();              //первый элемент в стеке
+        int pid = plist.top();              //первый элемент в очереди
 
         if (pid == des) 
         {
@@ -117,7 +117,7 @@ bool SoukupAlgo(int x1, int y1, int x2, int y2)
         {
             int id = super_id;
             //cout<<"in plist "<<id<<endl;
-            plist.push(id);
+            plist.push(id);                             //добавляем элемент в очередь
             visit[id] = true;
             Spath[id] = pid;
             if (id == des)
@@ -125,11 +125,11 @@ bool SoukupAlgo(int x1, int y1, int x2, int y2)
                 return true;
             }
 
-            while (NGHBR_IN_DIR(id, visit, des) >= 0)
+            while (NGHBR_IN_DIR(id, visit, des) >= 0)               //если направление не меняется, движемся по нему же пока не достигнем приемника
             {
                 int new_id = NGHBR_IN_DIR(id, visit, des);
                 //cout<<"in plist "<<new_id<<endl;
-                plist.push(new_id);
+                plist.push(new_id);                                     //добавляем элемент в очередь
                 visit[new_id] = true;
                 Spath[new_id] = id;
                 if (new_id == des) 
@@ -139,10 +139,10 @@ bool SoukupAlgo(int x1, int y1, int x2, int y2)
                 id = new_id;
             }
         }
-        while (!plist.empty())                                          //опредеяем кто "ближе"
+        while (!plist.empty())                                          //пока есть элементы в очереди
         {
-            pid = plist.top();
-            int tx = pid / n, ty = pid % n;
+            pid = plist.top();                                          //обращаемся к первому элементу в стеке
+            int tx = pid / n, ty = pid % n;                             //определяем коор-ты точки в данный момент 
             for (int i = 0; i < 4; i++) 
             {
                 int x = tx + dx[i], y = ty + dy[i];
@@ -150,19 +150,17 @@ bool SoukupAlgo(int x1, int y1, int x2, int y2)
                 if ((x >= 0 && x < n && y >= 0 && y < n) && visit[id] == false && Sblock[id] == false)                  //определяем порядок построения трассировки
                 {
                     //cout<<"in nlist "<<id<<endl;
-                    nlist.push(id);
+                    nlist.push(id);                                     //добавить элемент в очередь
                     visit[id] = true;
                     Spath[id] = pid;
                 }
             }
-                    //cnt++;
-                     //if(cnt==50) return false;
-            plist.pop();
+            plist.pop();                                        //удаляем первый элемент из очереди
         }
-        while (!nlist.empty())                                       
+        while (!nlist.empty())                                  //если в очереди есть элементы                              
         {
-            plist.push(nlist.front());
-            nlist.pop();
+            plist.push(nlist.front());                          //добавляем в plist первый элемент из nlist
+            nlist.pop();                                        //удаляем первый элемент из очереди
         }
     }
     return false;
@@ -190,7 +188,7 @@ int main(int argc, char* argv[])
             Sboard[i][j] = '0';
         }
     }
-    memset(Lblock, false, (n * n) + 1);
+    memset(Lblock, false, (n * n) + 1);                                                                 //заполняем блоки памяти Lblock и Sblock 0
     memset(Sblock, false, (n * n) + 1);
 
     for (int i = 0; i < nblocks; i++)                                                               //расставляем препятствия из файла
@@ -198,7 +196,7 @@ int main(int argc, char* argv[])
         in >> bx >> by;
         Lboard[bx][by] = '#';
         Sboard[bx][by] = '#';
-        Lblock[bx * n + by] = true;
+        Lblock[bx * n + by] = true;                                                                         //хз
         Sblock[bx * n + by] = true;
     }
     bool ans[2][100];
@@ -212,7 +210,7 @@ int main(int argc, char* argv[])
 
     for (int i = 0; i < ntarget; i++)                                                                   //расставляем терминалы из файла
     {
-        in >> sx >> sy >> desx >> desy;
+        in >> sx >> sy >> desx >> desy;                                     //считываем коор-ты источника и коор-ты приемника
         srcX[i] = sx;                                       //start_x
         srcY[i] = sy;                                       //start_y
         desX[i] = desx;                                     //target_x
@@ -222,6 +220,8 @@ int main(int argc, char* argv[])
         Sboard[sx][sy] = 'S';
         Sboard[desx][desy] = 'T';
     }
+    print_termenal_and_barrier();
+    cout << endl << endl;
     Timer t;
     //--------------------------for Soukup Algorithm---------------------
     out2 << "Soukup Algorithm : " << endl;
