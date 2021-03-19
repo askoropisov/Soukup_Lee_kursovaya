@@ -18,6 +18,7 @@
 
 using namespace std;
 
+//для определения времени выполнения алгоритма
 class Timer {
 private: // Псевдонимы используются для удобного доступа к вложенным типам
     using clock_t = chrono::high_resolution_clock;
@@ -34,10 +35,11 @@ public:
 
 //int newDRP[100][100];
 //char Lboard[100][100], Sboard[100][100];
-int n=1, nblocks, bx, by, ntarget, sx, sy, desx, desy;
+int n=1, count_barrier, bx, by, count_trace, ist_x, ist_y, target_x, target_Y;
 bool Lblock[10000], Sblock[10000];
-int Lpath[10000], Spath[10000], dx[4] = { -1,0,1,0 }, dy[4] = { 0,-1,0,1 };
-int srcX[100], srcY[100], desX[100], desY[100];
+int Lpath[10000], Spath[10000],
+    dx[4] = { -1,0,1,0 }, dy[4] = { 0,-1,0,1 };
+int startX_mass[100], startY_mass[100], target_X_mass[100], target_Y_mass[100];
 int super_id;
 
 void print_termenal_and_barrier();
@@ -93,20 +95,20 @@ bool SoukupAlgo(int x1, int y1, int x2, int y2)
      bool visit[10000];
     memset(visit, false, (n * n) + 1);                              //заполняем все 0
 
-    int src = x1 * n + y1, des = x2 * n + y2;
+    int src = x1 * n + y1, des = x2 * n + y2;                       //src = старший разряд
 
-    stack<int>plist;                                                ////фифо
-    queue<int>nlist;                                                //лифо            
-       // cout << "in plist " << src << endl;
-    plist.push(src);                                                //добавляем элемент в очередь
+    stack<int>FILO_stack;                                                //FILO
+    queue<int>LIFO_queue;                                                //LIFO   (приоритетная очередь)           
+       // cout << "in FILO_stack " << src << endl;
+    FILO_stack.push(src);                                                //добавляем элемент в очередь
     Spath[src] = -1;
     visit[src] = true;
 
     int cnt = 0;
 
-    while (!plist.empty())                  //пока в очереди есть эл-ты    
+    while (!FILO_stack.empty())                  //пока в очереди есть эл-ты    
     {     
-        int pid = plist.top();              //первый элемент в очереди
+        int pid = FILO_stack.top();              //первый элемент в очереди
 
         if (pid == des) 
         {
@@ -116,8 +118,8 @@ bool SoukupAlgo(int x1, int y1, int x2, int y2)
         if (DIRECTION(pid, visit, des) <= TO_TARGET(pid, des))      //определяем расстояние от каждого источника до его приямника ис равниваем их
         {
             int id = super_id;
-            //cout<<"in plist "<<id<<endl;
-            plist.push(id);                             //добавляем элемент в очередь
+            //cout<<"in FILO_stack "<<id<<endl;
+            FILO_stack.push(id);                             //добавляем элемент в очередь
             visit[id] = true;
             Spath[id] = pid;
             if (id == des)
@@ -128,8 +130,8 @@ bool SoukupAlgo(int x1, int y1, int x2, int y2)
             while (NGHBR_IN_DIR(id, visit, des) >= 0)               //если направление не меняется, движемся по нему же пока не достигнем приемника
             {
                 int new_id = NGHBR_IN_DIR(id, visit, des);
-                //cout<<"in plist "<<new_id<<endl;
-                plist.push(new_id);                                     //добавляем элемент в очередь
+                //cout<<"in FILO_stack "<<new_id<<endl;
+                FILO_stack.push(new_id);                                     //добавляем элемент в очередь
                 visit[new_id] = true;
                 Spath[new_id] = id;
                 if (new_id == des) 
@@ -139,9 +141,9 @@ bool SoukupAlgo(int x1, int y1, int x2, int y2)
                 id = new_id;
             }
         }
-        while (!plist.empty())                                          //пока есть элементы в очереди
+        while (!FILO_stack.empty())                                          //пока есть элементы в очереди
         {
-            pid = plist.top();                                          //обращаемся к первому элементу в стеке
+            pid = FILO_stack.top();                                          //обращаемся к первому элементу в стеке
             int tx = pid / n, ty = pid % n;                             //определяем коор-ты точки в данный момент 
             for (int i = 0; i < 4; i++) 
             {
@@ -149,18 +151,18 @@ bool SoukupAlgo(int x1, int y1, int x2, int y2)
                 int id = x * n + y;
                 if ((x >= 0 && x < n && y >= 0 && y < n) && visit[id] == false && Sblock[id] == false)                  //определяем порядок построения трассировки
                 {
-                    //cout<<"in nlist "<<id<<endl;
-                    nlist.push(id);                                     //добавить элемент в очередь
+                    //cout<<"in LIFO_queue "<<id<<endl;
+                    LIFO_queue.push(id);                                     //добавить элемент в очередь
                     visit[id] = true;
                     Spath[id] = pid;
                 }
             }
-            plist.pop();                                        //удаляем первый элемент из очереди
+            FILO_stack.pop();                                        //удаляем первый элемент из очереди
         }
-        while (!nlist.empty())                                  //если в очереди есть элементы                              
+        while (!LIFO_queue.empty())                                  //если в очереди есть элементы                              
         {
-            plist.push(nlist.front());                          //добавляем в plist первый элемент из nlist
-            nlist.pop();                                        //удаляем первый элемент из очереди
+            FILO_stack.push(LIFO_queue.front());                          //добавляем в FILO_stack первый элемент из LIFO_queue
+            LIFO_queue.pop();                                        //удаляем первый элемент из очереди
         }
     }
     return false;
@@ -178,8 +180,8 @@ int main(int argc, char* argv[])
 
     ifstream in("input.txt");                                                                       //считываем вхдные данные 
     ofstream out2("soukup.txt");
-    in >> n;                                                                                        //размер ?
-    in >> nblocks;                                                                                  //кол-во препятствий
+    in >> n;           //не трогать                                                                 //размер ?
+    in >> count_barrier;                                                                                  //кол-во препятствий
     for (int i = 0; i < n; i++)                                                                     //заполняем ДРП 0
     {
         for (int j = 0; j < n; j++) 
@@ -191,9 +193,9 @@ int main(int argc, char* argv[])
     memset(Lblock, false, (n * n) + 1);                                                                 //заполняем блоки памяти Lblock и Sblock 0
     memset(Sblock, false, (n * n) + 1);
 
-    for (int i = 0; i < nblocks; i++)                                                               //расставляем препятствия из файла
+    for (int i = 0; i < count_barrier; i++)                                                               //расставляем препятствия из файла
     {
-        in >> bx >> by;
+        in >> bx >> by;         
         Lboard[bx][by] = '#';
         Sboard[bx][by] = '#';
         Lblock[bx * n + by] = true;                                                                         //хз
@@ -201,57 +203,65 @@ int main(int argc, char* argv[])
     }
     bool ans[2][100];
 
-    in >> ntarget;                                                                                  //кол-во трасс (путей) 
+    in >> count_trace;                                                                                  //кол-во трасс (путей) 
 
     cout << endl << endl;
     _getch();
     print_termenal_and_barrier();
     cout << endl << endl;
 
-    for (int i = 0; i < ntarget; i++)                                                                   //расставляем терминалы из файла
+   /* создаем и заполняем 4 массива
+    1) массив Х коор-т источников
+    2) массив У коор-т источников
+    3) массив Х коор-т приемников
+    4) массив У коор-т приемников
+    обозначаем источники и приемники соответствующими символами
+    выводим в консоль*/
+    for (int i = 0; i < count_trace; i++)                                                                   //расставляем терминалы из файла
     {
-        in >> sx >> sy >> desx >> desy;                                     //считываем коор-ты источника и коор-ты приемника
-        srcX[i] = sx;                                       //start_x
-        srcY[i] = sy;                                       //start_y
-        desX[i] = desx;                                     //target_x
-        desY[i] = desy;                                     //target_y
-        Lboard[sx][sy] = 'S';
-        Lboard[desx][desy] = 'T';
-        Sboard[sx][sy] = 'S';
-        Sboard[desx][desy] = 'T';
+        in >> ist_x >> ist_y >> target_x >> target_Y;                                     //считываем коор-ты источника и коор-ты приемника
+        startX_mass[i] = ist_x;                                       //start_x
+        startY_mass[i] = ist_y;                                       //start_y
+        target_X_mass[i] = target_x;                                     //target_x
+        target_Y_mass[i] = target_Y;                                     //target_y
+        Lboard[ist_x][ist_y] = 'S';
+        Lboard[target_x][target_Y] = 'T';
+        Sboard[ist_x][ist_y] = 'S';
+        Sboard[target_x][target_Y] = 'T';
     }
     print_termenal_and_barrier();
     cout << endl << endl;
     Timer t;
+
     //--------------------------for Soukup Algorithm---------------------
     out2 << "Soukup Algorithm : " << endl;
 
-    for (int i = 0; i < ntarget; i++)                                       //для каждой пары приемник-источник
+    for (int i = 0; i < count_trace; i++)                                       //для каждой пары приемник-источник
     {
-        sx = srcX[i];
-        sy = srcY[i];
-        desx = desX[i];
-        desy = desY[i];
+        ist_x = startX_mass[i];
+        ist_y = startY_mass[i];
+        target_x = target_X_mass[i];
+        target_Y = target_Y_mass[i];
         //for Lee's algorithm
-        if (SoukupAlgo(sx, sy, desx, desy) == true)                           //find destination and return Lpath;
+        if (SoukupAlgo(ist_x, ist_y, target_x, target_Y) == true)                           //find destination and return Lpath;
         {   
 
-            int id = desx * n + desy;
+            int id = target_x * n + target_Y;
             Sblock[id] = true;
-            Sblock[sx * n + sy] = true;
+            Sblock[ist_x * n + ist_y] = true;
             while (Spath[id] != -1)
             {
                 Sboard[Spath[id] / n][Spath[id] % n] = '*';
                 Sblock[Spath[id]] = true;
                 id = Spath[id];
             }
-            Sboard[sx][sy] = 'S';
+            Sboard[ist_x][ist_y] = 'S';
             ans[1][i] = true;
         }
         else                                                         //there is no route
         {     
-            Sboard[sx][sy] = 's';
-            Sboard[desx][desy] = 't';
+            Sboard[ist_x][ist_y] = 's';
+            Sboard[target_x][target_Y] = 't';
             ans[1][i] = false;
         }
     }
@@ -263,11 +273,11 @@ int main(int argc, char* argv[])
         out2 << endl;
     }
     out2 << endl;
-    for (int i = 0; i < ntarget; i++)                                               //если нельзя провести трассировку
+    for (int i = 0; i < count_trace; i++)                                               //если нельзя провести трассировку
     {
         if (ans[1][i] == false)
         {
-            out2 << " (" << sx << "," << sy << ")->(" << desx << "," << desy << ") невозможно провести трассировку." << endl;
+            out2 << " (" << ist_x << "," << ist_y << ")->(" << target_x << "," << target_Y << ") невозможно провести трассировку." << endl;
         }
     }
 
