@@ -47,18 +47,18 @@ void print_DRP();
 void Print_newDRP(char Sboard[100][100]);
 void RenderScene();
 
-int TO_TARGET(int curr, int target)                             //расстояние до приемника
+int TO_TARGET(int curr, int target)                                                             //расстояние до приемника
 {
-    int dis;
-    int tx = target / n, ty = target % n, cx = curr / n, cy = curr % n;                     //снова определяем координаты Х и У приемника и источника
-    dis = abs(tx - cx) + abs(ty - cy);
-    return dis;                                                                             //находим манхеттоновское расстояние
+    int Manh_dist;
+    int tx = target / n, ty = target % n, cx = curr / n, cy = curr % n;                         //снова определяем координаты Х и У приемника и источника
+    Manh_dist = abs(tx - cx) + abs(ty - cy);
+    return Manh_dist;                                                                             //находим манхеттоновское расстояние
 }
 
-int DIRECTION(int next, bool visit[], int target)                           //направление
+int DIRECTION(int next, bool visit[], int target)                                                    //направление
 {
-    int dis = INT_MAX;
-    int tx = target / n, ty = target % n, nx = next / n, ny = next % n;                     //снова определяем координаты Х и У приемника и источника
+    int Manh_dist = INT_MAX;
+    int tx = target / n, ty = target % n, nx = next / n, ny = next % n;                              //снова определяем координаты Х и У приемника и источника
 
     for (int i = 0; i < 4; i++) 
     {
@@ -66,23 +66,23 @@ int DIRECTION(int next, bool visit[], int target)                           //на
         int id = x * n + y;
         if ((x >= 0 && x < n && y >= 0 && y < n) && visit[id] == false && Sblock[id] == false)          //определяем наименьшее расстояние между источником и приемником в зависимости от выбора направления ???
         {
-            if (dis > abs(tx - x) + abs(ty - y))
+            if (Manh_dist > abs(tx - x) + abs(ty - y))
             {
-                dis = abs(tx - x) + abs(ty - y);
+                Manh_dist = abs(tx - x) + abs(ty - y);
                 super_id = id;
             }
         }
     }
-    return dis;                                                                                         //находим направление, начиная с которого получим наименьшеее расстояние ??
+    return Manh_dist;                                                                                         //находим направление, начиная с которого получим наименьшеее расстояние ??
 }
 
-int NGHBR_IN_DIR(int curr, bool visit[], int des)
+int NGHBR_IN_DIR(int curr, bool visit[], int target_func)                                   //проверка на смену направления????
 {
-    int x = curr / n, y = curr % n;                                                 //хз
+    int x = curr / n, y = curr % n;                                                 //
     bool flag = true;
     int id;
 
-    if (DIRECTION(curr, visit, des) <= TO_TARGET(curr, des)) 
+    if (DIRECTION(curr, visit, target_func) <= TO_TARGET(curr, target_func)) 
     {
         flag = false;
         id = super_id;
@@ -95,46 +95,46 @@ bool SoukupAlgo(int x1, int y1, int x2, int y2)
      bool visit[10000];
     memset(visit, false, (n * n) + 1);                              //заполняем все 0
 
-    int src = x1 * n + y1, des = x2 * n + y2;                       //src = старший разряд
+    int start_func = x1 * n + y1, target_func = x2 * n + y2;                       //
 
     stack<int>FILO_stack;                                                //FILO
     queue<int>LIFO_queue;                                                //LIFO   (приоритетная очередь)           
-       // cout << "in FILO_stack " << src << endl;
-    FILO_stack.push(src);                                                //добавляем элемент в очередь
-    Spath[src] = -1;
-    visit[src] = true;
+       // cout << "in FILO_stack " << start_func << endl;
+    FILO_stack.push(start_func);                                                //добавляем элемент в очередь
+    Spath[start_func] = -1;
+    visit[start_func] = true;
 
     int cnt = 0;
 
     while (!FILO_stack.empty())                  //пока в очереди есть эл-ты    
     {     
-        int pid = FILO_stack.top();              //первый элемент в очереди
+        int first_element = FILO_stack.top();              //первый элемент в очереди
 
-        if (pid == des) 
+        if (first_element == target_func) 
         {
             return true;
         }
 
-        if (DIRECTION(pid, visit, des) <= TO_TARGET(pid, des))      //определяем расстояние от каждого источника до его приямника ис равниваем их
+        if (DIRECTION(first_element, visit, target_func) <= TO_TARGET(first_element, target_func))      //определяем расстояние от каждого источника до его приямника и сравниваем их
         {
             int id = super_id;
             //cout<<"in FILO_stack "<<id<<endl;
             FILO_stack.push(id);                             //добавляем элемент в очередь
             visit[id] = true;
-            Spath[id] = pid;
-            if (id == des)
+            Spath[id] = first_element;
+            if (id == target_func)
             {
                 return true;
             }
 
-            while (NGHBR_IN_DIR(id, visit, des) >= 0)               //если направление не меняется, движемся по нему же пока не достигнем приемника
+            while (NGHBR_IN_DIR(id, visit, target_func) >= 0)               //если направление не меняется, движемся по нему же пока не достигнем приемника
             {
-                int new_id = NGHBR_IN_DIR(id, visit, des);
+                int new_id = NGHBR_IN_DIR(id, visit, target_func);
                 //cout<<"in FILO_stack "<<new_id<<endl;
                 FILO_stack.push(new_id);                                     //добавляем элемент в очередь
                 visit[new_id] = true;
                 Spath[new_id] = id;
-                if (new_id == des) 
+                if (new_id == target_func) 
                 {
                     return true;
                 }
@@ -143,8 +143,8 @@ bool SoukupAlgo(int x1, int y1, int x2, int y2)
         }
         while (!FILO_stack.empty())                                          //пока есть элементы в очереди
         {
-            pid = FILO_stack.top();                                          //обращаемся к первому элементу в стеке
-            int tx = pid / n, ty = pid % n;                             //определяем коор-ты точки в данный момент 
+            first_element = FILO_stack.top();                                          //обращаемся к первому элементу в стеке
+            int tx = first_element / n, ty = first_element % n;                             //определяем коор-ты точки в данный момент 
             for (int i = 0; i < 4; i++) 
             {
                 int x = tx + dx[i], y = ty + dy[i];
@@ -154,7 +154,7 @@ bool SoukupAlgo(int x1, int y1, int x2, int y2)
                     //cout<<"in LIFO_queue "<<id<<endl;
                     LIFO_queue.push(id);                                     //добавить элемент в очередь
                     visit[id] = true;
-                    Spath[id] = pid;
+                    Spath[id] = first_element;
                 }
             }
             FILO_stack.pop();                                        //удаляем первый элемент из очереди
@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
         target_x = target_X_mass[i];
         target_Y = target_Y_mass[i];
         //for Lee's algorithm
-        if (SoukupAlgo(ist_x, ist_y, target_x, target_Y) == true)                           //find destination and return Lpath;
+        if (SoukupAlgo(ist_x, ist_y, target_x, target_Y) == true)                           //если трассировка прошла успешно, визуализируем ее в консоле
         {   
 
             int id = target_x * n + target_Y;
@@ -258,7 +258,7 @@ int main(int argc, char* argv[])
             Sboard[ist_x][ist_y] = 'S';
             ans[1][i] = true;
         }
-        else                                                         //there is no route
+        else                                                         //если нельзя провести трассировку
         {     
             Sboard[ist_x][ist_y] = 's';
             Sboard[target_x][target_Y] = 't';
